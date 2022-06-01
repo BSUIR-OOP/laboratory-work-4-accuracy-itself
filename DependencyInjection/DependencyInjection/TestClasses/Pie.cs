@@ -1,11 +1,10 @@
-﻿using DependencyInjection.TestClasses;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DependencyInjection
+namespace DependencyInjection.TestClasses
 {
     internal class Pie
     {
@@ -14,6 +13,7 @@ namespace DependencyInjection
         public Pie(Ingredient ingredient)
         {
             MainIngredient = ingredient;
+            Name = ingredient.Name + " pie";
         }
 
         public void ShowPieInfo()

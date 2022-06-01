@@ -10,9 +10,11 @@ namespace DependencyInjection
         {
             var container = new DependencyInjectionContainer();
 
-            container.AddTransientCreation<Ingredient>();
-            container.AddSingletonCreation<Pie>();
-
+            container.AddSingletonCreation<Ingredient>();
+            container.AddTransientCreation<Pie>();
+            container.AddTransientCreation<Breakfast>();
+            container.AddTransientCreation<DayFood>();
+            
             var pie = container.GetObject<Pie>();
             pie.Name = "piiiie";
             pie.ShowPieInfo();
@@ -26,6 +28,16 @@ namespace DependencyInjection
 
             var ingredient2 = container.GetObject<Ingredient>();    
             Console.WriteLine(ingredient2.Name);
+
+            var breakfast = container.GetObject<Breakfast>();
+            breakfast.ShowBreakfastInfo();
+
+            var dayFood = container.GetObject<DayFood>();
+            dayFood.ShowFoodInfo();
+
+            container.AddSingletonCreation<A>();
+            container.AddTransientCreation<B>();
+            var a = container.GetObject<A>();
         }
     }
 }

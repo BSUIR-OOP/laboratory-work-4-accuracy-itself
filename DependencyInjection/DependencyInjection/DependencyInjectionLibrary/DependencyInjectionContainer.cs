@@ -12,6 +12,7 @@ namespace DependencyInjection.DependencyInjectionLibrary
     internal class DependencyInjectionContainer
     {
         private Dictionary<Type, object> SingletonsDictionary = new Dictionary<Type, object>();
+        private List<Type> InstanseTypeList = new List<Type>();
         private Dictionary<Type, GetObjectDelegate> GetObjectDictionary = new Dictionary<Type, GetObjectDelegate> ();
         private Dictionary<Type, ConstructorInfo> ConstructorsDictionary = new Dictionary<Type, ConstructorInfo>();
         
@@ -27,7 +28,7 @@ namespace DependencyInjection.DependencyInjectionLibrary
         public void AddTransientCreation<T>()
         {
             Type type = typeof(T);
-            GetObjectDictionary[type] = GetSingleton;
+            GetObjectDictionary[type] = GetInstance;
             ConstructorsDictionary[type] = type.GetConstructors().Single();
         }
 
@@ -39,8 +40,10 @@ namespace DependencyInjection.DependencyInjectionLibrary
             {
                 throw new Exception("can't get such object!!!");
             }
-            
-            return (T)GetObjectDictionary[type](type);
+
+            var instance = GetObjectDictionary[type](type);
+            //InstanseDictionary.Clear();
+            return (T)instance;
         }
 
         //returns singleton
@@ -48,7 +51,7 @@ namespace DependencyInjection.DependencyInjectionLibrary
         {
             if(!SingletonsDictionary.ContainsKey(type))
             {
-                var Singleton = GetTransient(type);
+                var Singleton = GetInstance(type);
                 SingletonsDictionary[type] = Singleton;
             }
 
@@ -66,9 +69,15 @@ namespace DependencyInjection.DependencyInjectionLibrary
             return GetObjectDictionary[type](type);
         }
 
-        //returns transient
-        private object GetTransient(Type type)
+        //returns instance
+        private object GetInstance(Type type)
         {
+            if(InstanseTypeList.Contains(type))
+            {
+                throw new Exception("cycle exception!!!");
+            }
+
+            InstanseTypeList.Add(type);
             var constructor = ConstructorsDictionary[type];
             var parametres = constructor.GetParameters();
             List<object> parametersList = new List<object>();
@@ -76,9 +85,11 @@ namespace DependencyInjection.DependencyInjectionLibrary
             foreach(var param in parametres)
             {
                 parametersList.Add(this.GetObjectByType(param.ParameterType));
+                InstanseTypeList.Clear();
             }
 
-            return constructor.Invoke(parametersList.ToArray());
+            var instance = constructor.Invoke(parametersList.ToArray());
+            return instance;
         }
     }
 }
