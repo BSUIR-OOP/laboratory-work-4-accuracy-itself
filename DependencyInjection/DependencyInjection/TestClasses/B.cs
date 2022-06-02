@@ -9,10 +9,11 @@ namespace DependencyInjection.TestClasses
 {
     internal class B
     {
-        private A a;
-        public B(A a)
+        private C c;
+
+        public B(Breakfast k, C c)
         {
-            this.a = a;
+            this.c = c;
         }
     }
 }

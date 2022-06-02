@@ -7,12 +7,11 @@ using System.Threading.Tasks;
 
 namespace DependencyInjection.DependencyInjectionLibrary
 {
-    delegate object GetObjectDelegate(Type type); 
+    delegate object GetObjectDelegate(Type type, List<Type> types); 
 
     internal class DependencyInjectionContainer
     {
         private Dictionary<Type, object> SingletonsDictionary = new Dictionary<Type, object>();
-        private List<Type> InstanseTypeList = new List<Type>();
         private Dictionary<Type, GetObjectDelegate> GetObjectDictionary = new Dictionary<Type, GetObjectDelegate> ();
         private Dictionary<Type, ConstructorInfo> ConstructorsDictionary = new Dictionary<Type, ConstructorInfo>();
         
@@ -35,23 +34,24 @@ namespace DependencyInjection.DependencyInjectionLibrary
         //creating object(or getting if singleton) by its type(class)
         public T GetObject<T>()
         {
+            List<Type> InstanseTypeList = new List<Type>();
             Type type = typeof(T);
             if(!GetObjectDictionary.ContainsKey(type))
             {
                 throw new Exception("can't get such object!!!");
             }
 
-            var instance = GetObjectDictionary[type](type);
-            //InstanseDictionary.Clear();
+            var instance = GetObjectDictionary[type](type, InstanseTypeList);
+            InstanseTypeList.Clear();
             return (T)instance;
         }
 
         //returns singleton
-        private object GetSingleton(Type type)
+        private object GetSingleton(Type type, List<Type> InstanseTypeList)
         {
             if(!SingletonsDictionary.ContainsKey(type))
             {
-                var Singleton = GetInstance(type);
+                var Singleton = GetInstance(type, InstanseTypeList);
                 SingletonsDictionary[type] = Singleton;
             }
 
@@ -59,20 +59,20 @@ namespace DependencyInjection.DependencyInjectionLibrary
         }
 
         //creating object by Type
-        public object GetObjectByType(Type type)
+        public object GetObjectByType(Type type, List<Type> InstanseTypeList)
         {
             if (!GetObjectDictionary.ContainsKey(type))
             {
                 throw new Exception("can't create such object!!!");
             }
 
-            return GetObjectDictionary[type](type);
+            return GetObjectDictionary[type](type, InstanseTypeList);
         }
 
         //returns instance
-        private object GetInstance(Type type)
+        private object GetInstance(Type type, List<Type> InstanseTypeList)
         {
-            if(InstanseTypeList.Contains(type))
+            if (InstanseTypeList.Contains(type))
             {
                 throw new Exception("cycle exception!!!");
             }
@@ -84,10 +84,10 @@ namespace DependencyInjection.DependencyInjectionLibrary
 
             foreach(var param in parametres)
             {
-                parametersList.Add(this.GetObjectByType(param.ParameterType));
-                InstanseTypeList.Clear();
+                parametersList.Add(this.GetObjectByType(param.ParameterType, InstanseTypeList));
+                InstanseTypeList.Remove(param.ParameterType);
             }
-
+            
             var instance = constructor.Invoke(parametersList.ToArray());
             return instance;
         }

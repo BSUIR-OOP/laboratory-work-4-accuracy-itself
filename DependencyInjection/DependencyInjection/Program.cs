@@ -37,6 +37,7 @@ namespace DependencyInjection
 
             container.AddSingletonCreation<A>();
             container.AddTransientCreation<B>();
+            container.AddTransientCreation<C>();
             var a = container.GetObject<A>();
         }
     }

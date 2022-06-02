@@ -8,5 +8,10 @@ namespace DependencyInjection.TestClasses
 {
     internal class C
     {
+        private A a;
+        public C(Breakfast c, A a)
+        {
+            //this.a = a;
+        }
     }
 }
